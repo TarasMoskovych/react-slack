@@ -5,8 +5,8 @@ import 'semantic-ui-css/semantic.min.css'
 import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import { setUser, clearUser } from './store/actions';
 import rootReducer from './store/reducers';
-import { setUser } from './store/actions';
 
 import App from './components/App';
 import Login from './components/Auth/Login';
@@ -29,6 +29,9 @@ class Root extends Component {
         if (userData) {
           this.props.setUser(userData);
           this.props.history.push('/');
+        } else {
+          this.props.history.push('/login');
+          this.props.clearUser();
         }
       });
   }
@@ -45,7 +48,7 @@ class Root extends Component {
 }
 
 const mapStateFromProps = state => ({ isLoading: state.user.isLoading });
-const RootWithAuth = withRouter(connect(mapStateFromProps, { setUser })(Root));
+const RootWithAuth = withRouter(connect(mapStateFromProps, { setUser, clearUser })(Root));
 
 ReactDOM.render(
   <Provider store={store}>

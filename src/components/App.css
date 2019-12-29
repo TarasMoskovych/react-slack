@@ -1,0 +1,24 @@
+html,
+body,
+.app {
+  background: #eee;
+  height: 100vh;
+}
+
+.app {
+  padding: 1em;
+}
+
+.server-error input {
+  background: #FFF6F6 !important;
+  border: 1px solid #D3A1A0 !important;
+  color: #A03D3B !important;
+}
+
+.server-error i {
+  color: #A03D3B;
+}
+
+.server-error input::placeholder {
+  color: #D3A1A0 !important;
+}

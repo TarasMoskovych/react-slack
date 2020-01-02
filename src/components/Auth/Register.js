@@ -39,7 +39,7 @@ class Register extends Component {
           photoURL: generateAvatar(userData.user.uid)
         })
         .then(() => {
-          this.saveUser(userData).then(() => console.log('user was created'));
+          this.saveUser(userData);
         });
       })
       .catch(err => this.setState({ errors: this.state.errors.concat(err) }))
@@ -51,7 +51,7 @@ class Register extends Component {
 
     return this.state.usersRef
       .child(user.uid)
-      .set({ displayName, email, photoURL })
+      .set({ displayName, email, photoURL });
   };
 
   displayErrors = errors => errors.map((error, idx) => <p key={idx}>{error.message}</p>);
@@ -136,7 +136,7 @@ class Register extends Component {
                 color="orange"
                 fluid
                 size="large"
-              >Submit</Button>
+              >Register</Button>
             </Segment>
           </Form>
           {errors.length > 0 && (

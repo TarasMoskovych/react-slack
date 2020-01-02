@@ -25,9 +25,9 @@ class Root extends Component {
   componentDidMount() {
     firebase
       .auth()
-      .onAuthStateChanged(userData => {
-        if (userData) {
-          this.props.setUser(userData);
+      .onAuthStateChanged(user => {
+        if (user && user.emailVerified) {
+          this.props.setUser(user);
           this.props.history.push('/');
         } else {
           this.props.history.push('/login');

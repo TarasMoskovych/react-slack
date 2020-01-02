@@ -29,10 +29,7 @@ class Login extends Component {
       .auth()
       .signInWithEmailAndPassword(email, password)
       .then(userData => {
-        console.log(userData);
-        if (userData.user.emailVerified) {
-
-        } else {
+        if (!userData.user.emailVerified) {
           this.setState({ errors: this.state.errors.concat({ message: 'Your account is inactive. Please, confirm Your email.' }) });
         }
       })
@@ -92,7 +89,7 @@ class Login extends Component {
                 color="violet"
                 fluid
                 size="large"
-              >Submit</Button>
+              >Login</Button>
             </Segment>
           </Form>
           {errors.length > 0 && (

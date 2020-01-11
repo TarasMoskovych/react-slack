@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Segment, Comment } from 'semantic-ui-react';
+import { Segment, Comment, Loader } from 'semantic-ui-react';
 
 import MessagesHeader from './MessagesHeader';
 import MessageForm from './MessageForm';
@@ -8,12 +8,18 @@ import firebase from './../../firebase';
 import { Collections } from './../../helpers';
 
 class Messages extends Component {
+  ref = null;
+
   state = {
     messagesRef: firebase.database().ref(Collections.Messages),
     channel: this.props.currentChannel,
     messages: [],
     loading: true,
-    user: this.props.currentUser
+    searchTerm: '',
+    searchLoading: false,
+    searchResults: [],
+    user: this.props.currentUser,
+    users: 0
   }
 
   componentDidMount() {
@@ -30,40 +36,99 @@ class Messages extends Component {
   }
 
   addMessageListener(id) {
+    const { messagesRef } = this.state;
     const messages = [];
 
-    this.state.messagesRef
+    messagesRef
+      .child(id)
+      .once('value', snapshot => {
+        if (snapshot.numChildren() === 0) {
+          this.setState({ loading: false });
+        }
+      });
+
+    messagesRef
       .child(id)
       .on('child_added', snapshot => {
         messages.push(snapshot.val());
-        this.setState({ messages, loading: false });
+
+        this.setState({
+          messages,
+          loading: false,
+          users: messages.reduce((acc, message) => {
+            if (!acc.includes(message.user.id)) {
+              acc.push(message.user.id);
+            }
+
+            return acc;
+          }, []).length
+        });
+
         this.scrollToLastMessage();
       });
   }
 
-  scrollToLastMessage = () => {
-    const elements = document.querySelectorAll('.comment');
+  scrollToLastMessage = () => this.ref && this.ref.scrollIntoView({ behavior: 'smooth' });
 
-    if (elements && elements.length) {
-      elements[elements.length - 1].scrollIntoView({ behavior: 'smooth' });
-    }
+  getRef = node => this.ref = node;
+
+  renderChannelName = channel => channel ? `#${channel.name}` : '';
+
+  handleSearchChange = event => {
+    this.setState({ searchTerm: event.target.value, searchLoading: true }, () => this.searchMessages());
+  }
+
+  searchMessages = () => {
+    const regex = new RegExp(this.state.searchTerm, 'gi');
+
+    this.setState({
+      searchResults: [...this.state.messages].filter(message => {
+        // eslint-disable-next-line
+        return message.content && message.content.match(regex) || message.user.name.match(regex);
+      }),
+    });
+
+    setTimeout(() => this.setState({ searchLoading: false }), 1000);
+  }
+
+  renderMessages(messages) {
+    return (
+      messages.length > 0 && messages.map(message => (
+        <Message
+          key={message.timestamp}
+          message={message}
+          user={this.state.user}
+        />
+      ))
+    );
   }
 
   render() {
-    const { messagesRef, channel, user, messages, loading } = this.state;
+    const {
+      messagesRef,
+      channel,
+      user,
+      messages,
+      loading,
+      users,
+      searchTerm,
+      searchResults,
+      searchLoading
+    } = this.state;
 
     return (
       <div className="messages">
-        <MessagesHeader/>
+        <MessagesHeader
+          channelName={this.renderChannelName(channel)}
+          users={users}
+          handleSearchChange={this.handleSearchChange}
+          searchLoading={searchLoading}
+        />
         <Segment className="messages__area" style={{ margin: 0 }}>
+          <Loader active={loading} size="big"/>
           <Comment.Group style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 320px)', overflow: 'auto' }}>
-            {messages.length > 0 && messages.map(message => (
-              <Message
-                key={message.timestamp}
-                message={message}
-                user={user}
-              />
-            ))}
+            {this.renderMessages(searchTerm ? searchResults : messages)}
+            <div ref={this.getRef}/>
           </Comment.Group>
         </Segment>
         <MessageForm

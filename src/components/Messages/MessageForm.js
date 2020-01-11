@@ -20,16 +20,7 @@ class MessageForm extends Component {
     user: this.props.currentUser
   }
 
-  handleChange = event => {
-    this.setState({ [event.target.name]: event.target.value, errors: [] });
-  }
-
-  handleKeyPress = event => {
-    if (event.key === 'Enter') {
-      this.sendMessage();
-    }
-  }
-
+  // Effects
   sendMessage = () => {
     const { message, channel, errors } = this.state;
 
@@ -68,6 +59,22 @@ class MessageForm extends Component {
       });
   }
 
+  // Listeners
+  handleChange = event => {
+    this.setState({ [event.target.name]: event.target.value, errors: [] });
+  }
+
+  handleKeyPress = event => {
+    if (event.key === 'Enter') {
+      this.sendMessage();
+    }
+  }
+
+  openModal = () => this.setState({ modal: true });
+
+  closeModal = () => this.setState({ modal: false });
+
+  // Helpers
   createMessage = (fileUrl = null) => {
     const { user, message } = this.state;
 
@@ -88,10 +95,6 @@ class MessageForm extends Component {
 
     return data;
   }
-
-  openModal = () => this.setState({ modal: true });
-
-  closeModal = () => this.setState({ modal: false });
 
   uploadFile = (file, metadata) => {
     const { channel, storageRef, errors } = this.state;

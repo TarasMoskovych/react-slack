@@ -16,6 +16,20 @@ class Register extends Component {
     usersRef: databases.users()
   };
 
+  componentDidMount() {
+    Form.addValidationRule('confirmPassword', value => value.length ? value === this.state.password : true);
+  }
+
+  // Effects
+  saveUser = ({ user }) => {
+    const { displayName, email, photoURL } = user;
+
+    return this.state.usersRef
+      .child(user.uid)
+      .set({ displayName, email, photoURL });
+  };
+
+  // Listeners
   handleChange = event => {
     if (this.state.errors) { this.setState({ errors: [] }); }
 
@@ -46,23 +60,12 @@ class Register extends Component {
       .finally(() => this.setState({ loading: false }));
   };
 
-  saveUser = ({ user }) => {
-    const { displayName, email, photoURL } = user;
-
-    return this.state.usersRef
-      .child(user.uid)
-      .set({ displayName, email, photoURL });
-  };
-
+  // Renders
   displayErrors = errors => errors.map((error, idx) => <p key={idx}>{error.message}</p>);
 
   handleServerErrors = (errors, inputName) => {
     return errors.some(error => error.message.toLowerCase().includes(inputName)) ? 'server-error' : '';
   };
-
-  componentDidMount() {
-    Form.addValidationRule('confirmPassword', value => value.length ? value === this.state.password : true);
-  }
 
   render() {
     const { username, email, password, passwordConfirmation, loading, errors } = this.state;

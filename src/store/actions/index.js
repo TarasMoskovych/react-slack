@@ -32,3 +32,12 @@ export const setPrivateChannel = isPrivateChannel => {
     }
   };
 };
+
+export const setStarredChannel = isStarredChannel => {
+  return {
+    type: actionTypes.SET_STARRED_CHANNEL,
+    payload: {
+      isStarredChannel
+    }
+  };
+};

@@ -8,6 +8,7 @@ class FileModal extends Component {
     file: null
   }
 
+  // Listeners
   handleChange = event => {
     const file = event.target.files[0];
 

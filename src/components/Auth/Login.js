@@ -12,6 +12,7 @@ class Login extends Component {
     loading: false,
   };
 
+  // Listeners
   handleChange = event => {
     if (this.state.errors) { this.setState({ errors: [] }); }
 
@@ -37,6 +38,7 @@ class Login extends Component {
       .finally(() => this.setState({ loading: false }));
   };
 
+  // Renders
   displayErrors = errors => errors.map((error, idx) => <p key={idx}>{error.message}</p>);
 
   handleServerErrors = (errors, inputName) => {

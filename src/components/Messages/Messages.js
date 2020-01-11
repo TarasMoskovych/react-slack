@@ -12,6 +12,7 @@ class Messages extends Component {
   state = {
     messagesRef: databases.messages(),
     channel: this.props.currentChannel,
+    isChannelStarred: false,
     messages: [],
     loading: true,
     privateChannel: this.props.isPrivateChannel,
@@ -20,7 +21,8 @@ class Messages extends Component {
     searchLoading: false,
     searchResults: [],
     user: this.props.currentUser,
-    users: 0
+    users: 0,
+    usersRef: databases.users()
   }
 
   componentDidMount() {
@@ -28,12 +30,28 @@ class Messages extends Component {
 
     if (channel && user) {
       this.addListeners(channel.id);
+      this.addUserStarsListener(channel.id, user);
     }
-
   }
 
+  // Effects
   addListeners(id) {
     this.addMessageListener(id);
+  }
+
+  addUserStarsListener(id, user) {
+    const { usersRef } = this.state;
+
+    usersRef
+      .child(user.uid)
+      .child('starred')
+      .once('value')
+      .then(data => {
+        if (data && data.val()) {
+          const ids = Object.keys(data.val());
+          this.setState({ isChannelStarred: ids.includes(id) })
+        }
+      });
   }
 
   addMessageListener(id) {
@@ -69,6 +87,31 @@ class Messages extends Component {
       });
   }
 
+  starChannel = () => {
+    const { isChannelStarred, usersRef, user, channel } = this.state;
+
+    if (isChannelStarred) {
+      usersRef
+        .child(`${user.uid}/starred`)
+        .update({
+          [channel.id]: {
+            name: channel.name,
+            details: channel.details,
+            createdBy: {
+              name: channel.createdBy.name,
+              photoURL: channel.createdBy.photoURL
+            }
+          }
+        });
+    } else {
+      usersRef
+        .child(`${user.uid}/starred`)
+        .child(channel.id)
+        .remove(err => err && console.log(err));
+    }
+  }
+
+  // Helpers
   getMessagesRef = () => {
     const { messagesRef, privateMessagesRef, privateChannel } = this.state;
     return privateChannel ? privateMessagesRef : messagesRef;
@@ -81,6 +124,8 @@ class Messages extends Component {
   handleSearchChange = event => {
     this.setState({ searchTerm: event.target.value, searchLoading: true }, () => this.searchMessages());
   }
+
+  handleStar = () => this.setState({ isChannelStarred: !this.state.isChannelStarred }, () => this.starChannel());
 
   searchMessages = () => {
     const regex = new RegExp(this.state.searchTerm, 'gi');
@@ -95,6 +140,7 @@ class Messages extends Component {
     setTimeout(() => this.setState({ searchLoading: false }), 1000);
   }
 
+  // Renders
   renderChannelName = channel => channel ? `${this.state.privateChannel ? '@' : '#'}${channel.name}` : '';
 
   renderMessages(messages) {
@@ -116,6 +162,7 @@ class Messages extends Component {
       user,
       messages,
       loading,
+      isChannelStarred,
       privateChannel,
       users,
       searchTerm,
@@ -131,6 +178,8 @@ class Messages extends Component {
           handleSearchChange={this.handleSearchChange}
           searchLoading={searchLoading}
           privateChannel={privateChannel}
+          isChannelStarred={isChannelStarred}
+          handleStar={this.handleStar}
         />
         <Segment className="messages__area" style={{ margin: 0 }}>
           <Loader active={loading} size="big"/>

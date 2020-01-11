@@ -7,12 +7,14 @@ class UserPanel extends Component {
     user: this.props.currentUser
   }
 
+  // Effects
   handleSignOut = () => {
     firebase
       .auth()
       .signOut();
   };
 
+  // Helpers
   dropdownOptions = () => [
     {
       key: 'user',

@@ -22,6 +22,7 @@ class DirectMessages extends Component {
     }
   }
 
+  // Effects
   addListeners({ uid }) {
     const { usersRef, connectedRef, presenceRef } = this.state;
     const users = [];
@@ -55,6 +56,7 @@ class DirectMessages extends Component {
     });
   }
 
+  // Helpers
   updateUserStatus = (uid, connected = true) => {
     const users = this.state.users.reduce((acc, user) => {
       if (uid === user.uid) {
@@ -70,11 +72,11 @@ class DirectMessages extends Component {
     const channelId = this.getChannelId(user.uid);
 
     this.setState({ activeChannel: user.uid })
-    this.props.setPrivateChannel(true);
     this.props.setChannel({
       id: channelId,
       name: user.displayName
     });
+    this.props.setPrivateChannel(true);
   }
 
   getChannelId = id => {

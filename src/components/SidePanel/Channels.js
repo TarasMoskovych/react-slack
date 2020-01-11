@@ -1,18 +1,21 @@
 import React, { Component, Fragment } from 'react';
-import { Menu, Icon, Modal, Form, Input, Button } from 'semantic-ui-react';
+import { Menu, Icon, Modal, Form, Input, Button, Label } from 'semantic-ui-react';
 import { connect } from 'react-redux';
-import { setChannel, setPrivateChannel } from './../../store/actions';
+import { setChannel } from './../../store/actions';
 import { databases } from './../../firebase';
 
 class Channels extends Component {
   state = {
-    user: this.props.currentUser,
-    channels: [],
-    channelName: '',
+    channel: null,
     channelDetails: '',
-    modal: false,
+    channelName: '',
+    channels: [],
+    channelsRef: databases.channels(),
     firstLoad: true,
-    channelsRef: databases.channels()
+    messagesRef: databases.messages(),
+    modal: false,
+    notifications: [],
+    user: this.props.currentUser
   }
 
   componentDidMount() {
@@ -23,34 +26,7 @@ class Channels extends Component {
     this.removeListeners();
   }
 
-  openModal = () => {
-    this.setState({ modal: true });
-  }
-
-  closeModal = () => {
-    this.setState({ modal: false, channelName: '', channelDetails: '' });
-  }
-
-  handleSubmit = (event) => {
-    event.persist();
-
-    const { channelName, channelDetails } = this.state;
-
-    if (channelName && channelDetails) {
-      this.addChannel();
-    }
-  }
-
-  handleChange = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
-  }
-
-  changeChannel = channel => {
-    this.props.setChannel(channel);
-    this.props.setPrivateChannel(false);
-    this.setState({ active: channel.id });
-  }
-
+  // Effects
   addChannel() {
     const { channelsRef, channelName, channelDetails, user } = this.state;
     const key = channelsRef.push().key;
@@ -70,17 +46,6 @@ class Channels extends Component {
       .finally(() => this.closeModal());
   }
 
-  setFirstChannel() {
-    const { firstLoad, channels } = this.state;
-    this.setState({ firstLoad: false });
-
-    if (firstLoad && channels.length > 0) {
-      this.props.setChannel(channels[0]);
-      this.props.setPrivateChannel(false);
-      this.setState({ active: channels[0].id });
-    }
-  }
-
   addListeners() {
     const channels = [];
 
@@ -88,11 +53,114 @@ class Channels extends Component {
       channels.push(snapshot.val());
 
       this.setState({ channels }, () => this.setFirstChannel());
+      this.addNotificationListener(snapshot.key);
+    });
+  }
+
+  addNotificationListener = id => {
+    this.state.messagesRef.child(id).on('value', snapshot => {
+      const { channel, notifications } = this.state;
+
+      if (channel) {
+        this.handleNotifications(id, channel.id, notifications, snapshot);
+      }
     });
   }
 
   removeListeners() {
     this.state.channelsRef.off();
+  }
+
+  // Listeners
+  handleSubmit = (event) => {
+    event.persist();
+
+    const { channelName, channelDetails } = this.state;
+
+    if (channelName && channelDetails) {
+      this.addChannel();
+    }
+  }
+
+  handleChange = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  // Helpers
+  openModal = () => this.setState({ modal: true });
+
+  closeModal = () => this.setState({ modal: false, channelName: '', channelDetails: '' });
+
+  handleNotifications = (channelId, currentChannelId, notifications, snapshot) => {
+    const numChildren = snapshot.numChildren();
+    const idx = notifications.findIndex(notification => notification.id === channelId);
+    let lastTotal = 0;
+
+    if (idx !== -1) {
+      if (channelId !== currentChannelId) {
+        lastTotal = notifications[idx].total;
+
+        if (numChildren - lastTotal > 0) {
+          notifications[idx].count = numChildren - lastTotal;
+        }
+      }
+      notifications[idx].lastKnownTotal = numChildren;
+    } else {
+      notifications.push({
+        id: channelId,
+        total: numChildren,
+        lastKnownTotal: numChildren,
+        count: 0
+      });
+    }
+
+    this.setState({ notifications });
+  }
+
+  changeChannel = channel => {
+    this.props.setChannel(channel);
+    this.setState({ active: channel.id, channel });
+
+    this.clearNotifications();
+  }
+
+  clearNotifications = () => {
+    const { notifications, channel } = this.state;
+    const idx = notifications.findIndex(notification => notification.id === channel.id);
+
+    if (idx !== -1) {
+      const updatedNotifications = [...notifications];
+
+      updatedNotifications[idx].total = notifications[idx].lastKnownTotal;
+      updatedNotifications[idx].count = 0;
+
+      this.setState({ notifications: updatedNotifications });
+    }
+  }
+
+  setFirstChannel() {
+    const { firstLoad, channels } = this.state;
+    this.setState({ firstLoad: false });
+
+    if (firstLoad && channels.length > 0) {
+      const firstChannel = channels[0];
+
+      this.props.setChannel(firstChannel);
+      this.setState({ active: firstChannel.id, channel: firstChannel });
+    }
+  }
+
+  getNotificationCount = channel => {
+    const { notifications, active } = this.state;
+    let count = 0;
+
+    notifications.forEach(notification => {
+      if (notification.id === channel.id) {
+        count = notification.count;
+      }
+    });
+
+    return active === channel.id ? 0 : count;
   }
 
   render() {
@@ -110,12 +178,16 @@ class Channels extends Component {
           </Menu.Item>
           {channels.map(channel => (
             <Menu.Item
-              active={channel.id === active && !this.props.privateChannel}
+              active={channel.id === active && !this.props.privateChannel && !this.props.starredChannel}
               key={channel.id}
               onClick={() => this.changeChannel(channel)}
               name={channel.name}
               style={{ opacity: 0.7, color: 'white' }}
-            ># {channel.name}
+            >
+              {this.getNotificationCount(channel) > 0 && (
+                <Label color="red">{this.getNotificationCount(channel)}</Label>
+              )}
+              # {channel.name}
             </Menu.Item>
           ))}
         </Menu.Menu>
@@ -156,4 +228,4 @@ class Channels extends Component {
   }
 }
 
-export default connect(null, { setChannel, setPrivateChannel })(Channels);
+export default connect(null, { setChannel })(Channels);

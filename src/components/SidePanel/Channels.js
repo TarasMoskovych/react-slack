@@ -2,8 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Menu, Icon, Modal, Form, Input, Button } from 'semantic-ui-react';
 import { connect } from 'react-redux';
 import { setChannel, setPrivateChannel } from './../../store/actions';
-import firebase from './../../firebase';
-import { Collections } from './../../helpers';
+import { databases } from './../../firebase';
 
 class Channels extends Component {
   state = {
@@ -13,7 +12,7 @@ class Channels extends Component {
     channelDetails: '',
     modal: false,
     firstLoad: true,
-    channelsRef: firebase.database().ref(Collections.Channels)
+    channelsRef: databases.channels()
   }
 
   componentDidMount() {

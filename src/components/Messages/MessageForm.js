@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Segment, Button, Input } from 'semantic-ui-react';
 import uuidv4 from 'uuid/v4';
-import firebase from './../../firebase';
-import { Collections } from './../../helpers';
+import { databases } from './../../firebase';
+import { resources } from './../../helpers';
 import FileModal from './FileModal';
 import ProgressBar from './ProgressBar';
 
@@ -14,7 +14,7 @@ class MessageForm extends Component {
     message: '',
     modal: false,
     percentUploaded: 0,
-    storageRef: firebase.storage().ref(),
+    storageRef: databases.storage(),
     task: null,
     upload: '',
     user: this.props.currentUser
@@ -72,7 +72,7 @@ class MessageForm extends Component {
     const { user, message } = this.state;
 
     const data = {
-      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      timestamp: databases.timestamp(),
       user: {
         id: user.uid,
         name: user.displayName,
@@ -98,7 +98,7 @@ class MessageForm extends Component {
     const { privateChannel } = this.props;
 
     this.setState({ upload: 'uploading', task: storageRef
-      .child(`${Collections.resources(privateChannel, channel.id)}${uuidv4()}.jpg`)
+      .child(`${resources(privateChannel, channel.id)}${uuidv4()}.jpg`)
       .put(file, metadata) },
         () => {
           this.state.task.on('state_changed', snapshot => {

@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, Segment, Button, Header, Message, Icon } from 'semantic-ui-react';
 import { Form, Input } from 'semantic-ui-react-form-validator'
-import firebase from './../../firebase';
-import { Collections, generateAvatar } from './../../helpers';
+import firebase, { databases } from './../../firebase';
+import { generateAvatar } from './../../helpers';
 
 class Register extends Component {
   state = {
@@ -13,7 +13,7 @@ class Register extends Component {
     passwordConfirmation: '',
     errors: [],
     loading: false,
-    usersRef: firebase.database().ref(Collections.Users)
+    usersRef: databases.users()
   };
 
   handleChange = event => {

@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Menu, Icon } from 'semantic-ui-react';
 import { setChannel, setPrivateChannel } from './../../store/actions';
-import firebase from './../../firebase';
-import { Collections } from './../../helpers';
+import { databases } from './../../firebase';
 
 class DirectMessages extends Component {
   state = {
     activeChannel: '',
-    connectedRef: firebase.database().ref(Collections.ConnectedRef),
-    presenceRef: firebase.database().ref(Collections.Presence),
+    connectedRef: databases.connected(),
+    presenceRef: databases.presence(),
     user: this.props.currentUser,
     users: [],
-    usersRef: firebase.database().ref(Collections.Users)
+    usersRef: databases.users()
   }
 
   componentDidMount() {

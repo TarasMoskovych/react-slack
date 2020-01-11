@@ -14,4 +14,17 @@ firebase.initializeApp({
   measurementId: ''
 });
 
+export const databases = {
+  connected: () => firebase.database().ref('.info/connected'),
+  storage: () => firebase.storage().ref(),
+  timestamp: () => firebase.database.ServerValue.TIMESTAMP,
+
+  // Custom
+  channels: () => firebase.database().ref('channels'),
+  messages: () => firebase.database().ref('messages'),
+  presence: () => firebase.database().ref('presence'),
+  privateMessages: () => firebase.database().ref('privateMessages'),
+  users: () => firebase.database().ref('users'),
+};
+
 export default firebase;

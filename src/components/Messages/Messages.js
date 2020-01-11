@@ -4,19 +4,18 @@ import { Segment, Comment, Loader } from 'semantic-ui-react';
 import MessagesHeader from './MessagesHeader';
 import MessageForm from './MessageForm';
 import Message from './Message';
-import firebase from './../../firebase';
-import { Collections } from './../../helpers';
+import { databases } from './../../firebase';
 
 class Messages extends Component {
   ref = null;
 
   state = {
-    messagesRef: firebase.database().ref(Collections.Messages),
+    messagesRef: databases.messages(),
     channel: this.props.currentChannel,
     messages: [],
     loading: true,
     privateChannel: this.props.isPrivateChannel,
-    privateMessagesRef: firebase.database().ref(Collections.PrivateMessages),
+    privateMessagesRef: databases.privateMessages(),
     searchTerm: '',
     searchLoading: false,
     searchResults: [],

@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Menu, Icon, Modal, Form, Input, Button } from 'semantic-ui-react';
 import { connect } from 'react-redux';
-import { setChannel } from './../../store/actions';
+import { setChannel, setPrivateChannel } from './../../store/actions';
 import firebase from './../../firebase';
 import { Collections } from './../../helpers';
 
@@ -48,6 +48,7 @@ class Channels extends Component {
 
   changeChannel = channel => {
     this.props.setChannel(channel);
+    this.props.setPrivateChannel(false);
     this.setState({ active: channel.id });
   }
 
@@ -76,6 +77,7 @@ class Channels extends Component {
 
     if (firstLoad && channels.length > 0) {
       this.props.setChannel(channels[0]);
+      this.props.setPrivateChannel(false);
       this.setState({ active: channels[0].id });
     }
   }
@@ -109,7 +111,7 @@ class Channels extends Component {
           </Menu.Item>
           {channels.map(channel => (
             <Menu.Item
-              active={channel.id === active}
+              active={channel.id === active && !this.props.privateChannel}
               key={channel.id}
               onClick={() => this.changeChannel(channel)}
               name={channel.name}
@@ -155,4 +157,4 @@ class Channels extends Component {
   }
 }
 
-export default connect(null, { setChannel })(Channels);
+export default connect(null, { setChannel, setPrivateChannel })(Channels);

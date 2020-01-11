@@ -15,6 +15,8 @@ class Messages extends Component {
     channel: this.props.currentChannel,
     messages: [],
     loading: true,
+    privateChannel: this.props.isPrivateChannel,
+    privateMessagesRef: firebase.database().ref(Collections.PrivateMessages),
     searchTerm: '',
     searchLoading: false,
     searchResults: [],
@@ -36,10 +38,10 @@ class Messages extends Component {
   }
 
   addMessageListener(id) {
-    const { messagesRef } = this.state;
+    const ref = this.getMessagesRef();
     const messages = [];
 
-    messagesRef
+    ref
       .child(id)
       .once('value', snapshot => {
         if (snapshot.numChildren() === 0) {
@@ -47,7 +49,7 @@ class Messages extends Component {
         }
       });
 
-    messagesRef
+    ref
       .child(id)
       .on('child_added', snapshot => {
         messages.push(snapshot.val());
@@ -68,11 +70,14 @@ class Messages extends Component {
       });
   }
 
+  getMessagesRef = () => {
+    const { messagesRef, privateMessagesRef, privateChannel } = this.state;
+    return privateChannel ? privateMessagesRef : messagesRef;
+  }
+
   scrollToLastMessage = () => this.ref && this.ref.scrollIntoView({ behavior: 'smooth' });
 
   getRef = node => this.ref = node;
-
-  renderChannelName = channel => channel ? `#${channel.name}` : '';
 
   handleSearchChange = event => {
     this.setState({ searchTerm: event.target.value, searchLoading: true }, () => this.searchMessages());
@@ -90,6 +95,8 @@ class Messages extends Component {
 
     setTimeout(() => this.setState({ searchLoading: false }), 1000);
   }
+
+  renderChannelName = channel => channel ? `${this.state.privateChannel ? '@' : '#'}${channel.name}` : '';
 
   renderMessages(messages) {
     return (
@@ -110,6 +117,7 @@ class Messages extends Component {
       user,
       messages,
       loading,
+      privateChannel,
       users,
       searchTerm,
       searchResults,
@@ -123,6 +131,7 @@ class Messages extends Component {
           users={users}
           handleSearchChange={this.handleSearchChange}
           searchLoading={searchLoading}
+          privateChannel={privateChannel}
         />
         <Segment className="messages__area" style={{ margin: 0 }}>
           <Loader active={loading} size="big"/>
@@ -136,6 +145,8 @@ class Messages extends Component {
           currentChannel={channel}
           currentUser={user}
           scrollToLastMessage={this.scrollToLastMessage}
+          privateChannel={privateChannel}
+          getMessagesRef={this.getMessagesRef}
         />
       </div>
     );

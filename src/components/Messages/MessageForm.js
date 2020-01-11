@@ -32,12 +32,11 @@ class MessageForm extends Component {
 
   sendMessage = () => {
     const { message, channel, errors } = this.state;
-    const { messagesRef } = this.props;
 
     if (message.trim()) {
       this.setState({ loading: true });
 
-      messagesRef
+      this.props.getMessagesRef()
         .child(channel.id)
         .push()
         .set(this.createMessage())
@@ -96,9 +95,10 @@ class MessageForm extends Component {
 
   uploadFile = (file, metadata) => {
     const { channel, storageRef, errors } = this.state;
+    const { privateChannel } = this.props;
 
     this.setState({ upload: 'uploading', task: storageRef
-      .child(`${Collections.resources}${uuidv4()}.jpg`)
+      .child(`${Collections.resources(privateChannel, channel.id)}${uuidv4()}.jpg`)
       .put(file, metadata) },
         () => {
           this.state.task.on('state_changed', snapshot => {
@@ -110,7 +110,7 @@ class MessageForm extends Component {
           },
           () => {
             this.state.task.snapshot.ref.getDownloadURL().then(downloadURL => {
-              this.sendFileMessage(downloadURL, this.props.messagesRef, channel.id);
+              this.sendFileMessage(downloadURL, this.props.getMessagesRef(), channel.id);
             })
             .catch(err => {
               console.error(err);

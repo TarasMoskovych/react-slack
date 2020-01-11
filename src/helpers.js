@@ -4,5 +4,7 @@ export const generateAvatar = id => `http://gravatar.com/avatar/${md5(id)}?d=ide
 
 export const Collections = {
   Channels: 'channels',
-  Users: 'users'
+  Messages: 'messages',
+  Users: 'users',
+  resources: 'public/'
 };

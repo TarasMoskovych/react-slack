@@ -22,3 +22,34 @@ body,
 .server-error input::placeholder {
   color: #D3A1A0 !important;
 }
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.messages__area {
+  flex: 8;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.messages__header,
+.messages__form {
+  flex: 1;
+}
+
+.message--outcome {
+  border-left: 2px solid orange;
+  padding-left: 8px;
+}
+
+.message--image {
+  padding: 1em;
+}
+
+.progress-bar {
+  margin: .5em 0 0 0 !important;
+}

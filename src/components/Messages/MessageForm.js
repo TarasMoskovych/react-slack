@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import { Segment, Button, Input } from 'semantic-ui-react';
+import { Picker } from 'emoji-mart';
 import uuidv4 from 'uuid/v4';
 import { databases } from './../../firebase';
-import { resources } from './../../helpers';
+import { resources, colonToInicode } from './../../helpers';
 import FileModal from './FileModal';
 import ProgressBar from './ProgressBar';
 
 class MessageForm extends Component {
   state = {
     channel: this.props.currentChannel,
+    emojiPicker: false,
     errors: [],
     loading: false,
     message: '',
@@ -16,6 +18,7 @@ class MessageForm extends Component {
     percentUploaded: 0,
     storageRef: databases.storage(),
     task: null,
+    typingRef: databases.typing(),
     upload: '',
     user: this.props.currentUser
   }
@@ -31,12 +34,12 @@ class MessageForm extends Component {
         .child(channel.id)
         .push()
         .set(this.createMessage())
-        .then(() => {
-          this.setState({ errors: [] });
-          this.props.scrollToLastMessage();
-        })
+        .then(() => this.setState({ errors: [] }))
         .catch((e) => this.setState({ loading: false, errors: errors.concat(e) }))
-        .finally(() => this.setState({ loading: false, message: '' }));
+        .finally(() => {
+          this.setState({ loading: false, message: '', });
+          this.updateTyping();
+        });
     } else {
       this.setState({ errors: errors.concat({ message: 'Add a message' }) });
     }
@@ -49,14 +52,27 @@ class MessageForm extends Component {
       .child(pathToUpload)
       .push()
       .set(this.createMessage(downloadURL))
-      .then(() => {
-        this.setState({ upload: 'done' })
-        this.props.scrollToLastMessage();
-      })
+      .then(() => this.setState({ upload: 'done' }))
       .catch(err => {
         console.log(err);
         this.setState({ errors: errors.concat(err) });
       });
+  }
+
+  updateTyping = () => {
+    const { message, typingRef, channel, user } = this.state;
+
+    if (message) {
+      typingRef
+        .child(channel.id)
+        .child(user.uid)
+        .set(user.displayName);
+    } else {
+      typingRef
+        .child(channel.id)
+        .child(user.uid)
+        .remove();
+    }
   }
 
   // Listeners
@@ -64,10 +80,22 @@ class MessageForm extends Component {
     this.setState({ [event.target.name]: event.target.value, errors: [] });
   }
 
-  handleKeyPress = event => {
+  handleKeyUp = event => {
+    this.updateTyping();
+
     if (event.key === 'Enter') {
       this.sendMessage();
     }
+  }
+
+  handleTogglePicker = () => this.setState({ emojiPicker: !this.state.emojiPicker });
+
+  handleSelectEmoji = emoji => {
+    const oldMesage = this.state.message;
+    const newMessage = colonToInicode(` ${oldMesage} ${emoji.colons} `);
+
+    this.setState({ message: newMessage, emojiPicker: false });
+    setTimeout(() => this.inputRef.focus(), 0);
   }
 
   openModal = () => this.setState({ modal: true });
@@ -124,19 +152,35 @@ class MessageForm extends Component {
   }
 
   render() {
-    const { errors, message, loading, modal, upload, percentUploaded } = this.state;
+    const { errors, message, loading, modal, upload, percentUploaded, emojiPicker } = this.state;
 
     return (
       <Segment className="message__form">
+        {emojiPicker && (
+          <div className="emojiPicker">
+            <Picker
+              onSelect={this.handleSelectEmoji}
+              set="apple"
+              title="Pick your emoji"
+              emoji="point_up"
+              emojiSize={20}
+              sheetSize={32}
+              perLine={7}
+              showPreview={false}
+              showSkinTones={false}
+            />
+          </div>
+        )}
         <Input
+          ref={node => this.inputRef = node}
           fluid
           name="message"
           style={{ marginBottom: '.7em' }}
-          label={<Button icon="add"/>}
+          label={<Button onClick={this.handleTogglePicker} icon={emojiPicker ? 'remove' : 'add'}/>}
           labelPosition="left"
           placeholder="Type a message"
           onChange={this.handleChange}
-          onKeyPress={this.handleKeyPress}
+          onKeyUp={this.handleKeyUp}
           value={message}
           className={
             errors.some(error => error.message.includes('message')) ? 'error' : ''

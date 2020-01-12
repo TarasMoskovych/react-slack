@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import 'semantic-ui-css/semantic.min.css'
+import 'emoji-mart/css/emoji-mart.css';
 
 import { createStore } from 'redux';
 import { Provider, connect } from 'react-redux';

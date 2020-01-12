@@ -24,6 +24,7 @@ export const databases = {
   messages: () => firebase.database().ref('messages'),
   presence: () => firebase.database().ref('presence'),
   privateMessages: () => firebase.database().ref('privateMessages'),
+  typing: () => firebase.database().ref('typing'),
   user: () => firebase.auth().currentUser,
   users: () => firebase.database().ref('users'),
 };

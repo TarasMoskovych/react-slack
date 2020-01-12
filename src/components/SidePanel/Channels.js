@@ -15,6 +15,7 @@ class Channels extends Component {
     messagesRef: databases.messages(),
     modal: false,
     notifications: [],
+    typingRef: databases.typing(),
     user: this.props.currentUser
   }
 
@@ -118,10 +119,17 @@ class Channels extends Component {
   }
 
   changeChannel = channel => {
+    const { typingRef, user } = this.state;
+
     this.props.setChannel(channel);
     this.setState({ active: channel.id, channel });
 
     this.clearNotifications();
+
+    typingRef
+      .child(this.state.channel.id)
+      .child(user.uid)
+      .remove();
   }
 
   clearNotifications = () => {

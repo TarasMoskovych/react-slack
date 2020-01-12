@@ -22,7 +22,7 @@ const App = ({ currentUser, currentChannel, isPrivateChannel, isStarredChannel, 
         isPrivateChannel={isPrivateChannel}
         isStarredChannel={isStarredChannel}
       />
-      <Grid.Column style={{ marginLeft: 320 }}>
+      <Grid.Column style={{ marginLeft: 320, paddingBottom: 0 }}>
         <Messages
           key={currentChannel?.id}
           currentChannel={currentChannel}
@@ -30,14 +30,15 @@ const App = ({ currentUser, currentChannel, isPrivateChannel, isStarredChannel, 
           isPrivateChannel={isPrivateChannel}
         />
       </Grid.Column>
-      <Grid.Column width={4} style={{ paddingLeft: '0.5em' }}>
-        <MetaPanel
-          key={currentChannel?.name}
-          isPrivateChannel={isPrivateChannel}
-          currentChannel={currentChannel}
-          userPosts={userPosts}
-        />
-      </Grid.Column>
+        {!isPrivateChannel && (
+        <Grid.Column width={4} style={{ paddingLeft: '0.5em' }}>
+          <MetaPanel
+            key={currentChannel?.name}
+            currentChannel={currentChannel}
+            userPosts={userPosts}
+          />
+        </Grid.Column>
+        )}
     </Grid>
   );
 };

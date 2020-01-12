@@ -7,12 +7,14 @@ import _ from 'lodash';
 import MessagesHeader from './MessagesHeader';
 import MessageForm from './MessageForm';
 import Message from './Message';
+import Typing from './Typing';
 import { databases } from './../../firebase';
 
 class Messages extends Component {
   ref = null;
 
   state = {
+    connectedRef: databases.connected(),
     messagesRef: databases.messages(),
     channel: this.props.currentChannel,
     isChannelStarred: false,
@@ -23,9 +25,15 @@ class Messages extends Component {
     searchTerm: '',
     searchLoading: false,
     searchResults: [],
+    typingUsers: [],
+    typingRef: databases.typing(),
     user: this.props.currentUser,
     users: 0,
     usersRef: databases.users()
+  }
+
+  componentDidUpdate() {
+    this.scrollToLastMessage();
   }
 
   componentDidMount() {
@@ -40,6 +48,7 @@ class Messages extends Component {
   // Effects
   addListeners(id) {
     this.addMessageListener(id);
+    this.addTypingListeners(id);
   }
 
   addUserStarsListener(id, user) {
@@ -72,6 +81,7 @@ class Messages extends Component {
 
     ref
       .child(id)
+      .limitToLast(20)
       .on('child_added', snapshot => {
         messages.push(snapshot.val());
 
@@ -88,8 +98,46 @@ class Messages extends Component {
         });
 
         this.countUserPosts(messages, cb);
-        this.scrollToLastMessage();
       });
+  }
+
+  addTypingListeners(id) {
+    const { connectedRef, typingRef, user } = this.state;
+    let typingUsers = [];
+
+    typingRef
+      .child(id)
+      .on('child_added', snapshot => {
+        if (snapshot.key !== user.uid) {
+          typingUsers = typingUsers.concat({
+            id: snapshot.key,
+            name: snapshot.val()
+          });
+
+          this.setState({ typingUsers });
+        }
+      });
+
+    typingRef
+      .child(id)
+      .on('child_removed', snapshot => {
+        const idx = typingUsers.findIndex(user => user.id === snapshot.key);
+
+        if (idx !== -1) {
+          typingUsers = typingUsers.filter(user => user.id !== snapshot.key);
+          this.setState({ typingUsers });
+        }
+      });
+
+    connectedRef.on('value', snapshot => {
+      if (snapshot.val()) {
+        typingRef
+          .child(id)
+          .child(user.uid)
+          .onDisconnect()
+          .remove(err => err && console.error(err));
+      }
+    });
   }
 
   starChannel = () => {
@@ -176,6 +224,16 @@ class Messages extends Component {
     );
   }
 
+  renderTypingUsers = users => {
+    return (
+      users.length > 0 && users.map(user => (
+        <span key={user.id} className="user__typing">{user.name}
+          <Typing/>
+        </span>
+      ))
+    );
+  }
+
   render() {
     const {
       messagesRef,
@@ -188,7 +246,8 @@ class Messages extends Component {
       users,
       searchTerm,
       searchResults,
-      searchLoading
+      searchLoading,
+      typingUsers
     } = this.state;
 
     return (
@@ -208,12 +267,14 @@ class Messages extends Component {
             {this.renderMessages(searchTerm ? searchResults : messages)}
             <div ref={this.getRef}/>
           </Comment.Group>
+          <div className="user__typing-wrapper">
+            {this.renderTypingUsers(typingUsers)}
+          </div>
         </Segment>
         <MessageForm
           messagesRef={messagesRef}
           currentChannel={channel}
           currentUser={user}
-          scrollToLastMessage={this.scrollToLastMessage}
           privateChannel={privateChannel}
           getMessagesRef={this.getMessagesRef}
         />

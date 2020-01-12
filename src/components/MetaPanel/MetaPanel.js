@@ -4,8 +4,7 @@ import { Segment, Accordion, Header, Icon, Image, List } from 'semantic-ui-react
 class MetaPanel extends Component {
   state = {
     activeIdx: 0,
-    channel: this.props.currentChannel,
-    privateChannel: this.props.isPrivateChannel
+    channel: this.props.currentChannel
   }
 
   setActiveIdx = (event, titleProps) => {
@@ -33,10 +32,8 @@ class MetaPanel extends Component {
   }
 
   render() {
-    const { activeIdx, privateChannel, channel } = this.state;
+    const { activeIdx, channel } = this.state;
     const { userPosts } = this.props;
-
-    if (privateChannel) { return null; }
 
     return (
       <Segment loading={!channel}>

@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { Segment, Comment, Loader } from 'semantic-ui-react';
+import { connect } from 'react-redux';
+import { setUserPosts } from './../../store/actions';
+import _ from 'lodash';
 
 import MessagesHeader from './MessagesHeader';
 import MessageForm from './MessageForm';
@@ -57,6 +60,7 @@ class Messages extends Component {
   addMessageListener(id) {
     const ref = this.getMessagesRef();
     const messages = [];
+    const cb = _.debounce(posts => this.props.setUserPosts(posts), 500);
 
     ref
       .child(id)
@@ -83,6 +87,7 @@ class Messages extends Component {
           }, []).length
         });
 
+        this.countUserPosts(messages, cb);
         this.scrollToLastMessage();
       });
   }
@@ -117,7 +122,7 @@ class Messages extends Component {
     return privateChannel ? privateMessagesRef : messagesRef;
   }
 
-  scrollToLastMessage = () => this.ref && this.ref.scrollIntoView({ behavior: 'smooth' });
+  scrollToLastMessage = () => this.ref?.scrollIntoView({ behavior: 'smooth' });
 
   getRef = node => this.ref = node;
 
@@ -133,11 +138,27 @@ class Messages extends Component {
     this.setState({
       searchResults: [...this.state.messages].filter(message => {
         // eslint-disable-next-line
-        return message.content && message.content.match(regex) || message.user.name.match(regex);
+        return message.content?.match(regex) || message.user.name.match(regex);
       }),
     });
 
     setTimeout(() => this.setState({ searchLoading: false }), 1000);
+  }
+
+  countUserPosts = (messages, cb) => {
+    const userPosts = messages.reduce((acc, message) => {
+      if (message.user.name in acc) {
+        acc[message.user.name].count += 1;
+      } else {
+        acc[message.user.name] = {
+          photoURL: message.user.avatar, // @TODO change to photoURL
+          count: 1
+        }
+      }
+      return acc;
+    }, {});
+
+    cb(userPosts);
   }
 
   // Renders
@@ -201,4 +222,4 @@ class Messages extends Component {
   }
 }
 
-export default Messages;
+export default connect(null, { setUserPosts })(Messages);

@@ -41,3 +41,22 @@ export const setStarredChannel = isStarredChannel => {
     }
   };
 };
+
+export const setUserPosts = userPosts => {
+  return {
+    type: actionTypes.SET_USER_POSTS,
+    payload: {
+      userPosts
+    }
+  };
+};
+
+export const setColors = ({ primary, secondary }) => {
+  return {
+    type: actionTypes.SET_COLORS,
+    payload: {
+      primary,
+      secondary
+    }
+  };
+};

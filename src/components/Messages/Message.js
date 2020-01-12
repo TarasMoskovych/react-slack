@@ -8,6 +8,7 @@ const isImage = message => message.image && !message.content;
 
 const Message = ({ message, user }) => (
   <Comment>
+    {/* @TODO change to photoURL */}
     <Comment.Avatar src={message.user.avatar}/>
     <Comment.Content className={isOwnMessage(message, user)}>
       <Comment.Author as="a">{message.user.name}</Comment.Author>

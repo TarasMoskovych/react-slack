@@ -83,7 +83,7 @@ class MessageForm extends Component {
       user: {
         id: user.uid,
         name: user.displayName,
-        avatar: user.photoURL
+        avatar: user.photoURL // @TODO change to photoURL
       }
     };
 

@@ -57,3 +57,22 @@ body,
 .menu {
   padding-bottom: 1em;
 }
+
+.color__container {
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  width: 35px;
+}
+
+.color__square {
+  height: 35px;
+  width: 35px;
+}
+
+.color__overlay {
+  height: 35px;
+  transform: rotate(225deg);
+  width: 85px;
+}

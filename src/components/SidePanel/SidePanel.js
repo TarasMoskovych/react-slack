@@ -7,7 +7,7 @@ import UserPanel from './UserPanel';
 
 class SidePanel extends Component {
   render() {
-    const { currentUser, isPrivateChannel, isStarredChannel } = this.props;
+    const { currentUser, isPrivateChannel, isStarredChannel, colors } = this.props;
 
     return (
       <Menu
@@ -15,9 +15,9 @@ class SidePanel extends Component {
         inverted
         fixed="left"
         vertical
-        style={{ background: '#4c3c4c', fonsSize: '1.2rem' }}
+        style={{ background: colors.primary, fonsSize: '1.2rem' }}
       >
-        <UserPanel currentUser={currentUser}/>
+        <UserPanel currentUser={currentUser} colors={colors}/>
         <Starred
           currentUser={currentUser}
           isStarredChannel={isStarredChannel}

@@ -77,7 +77,7 @@ class Register extends Component {
             <Icon name="puzzle piece" color="orange"/>
             Register for DevChat
           </Header>
-          <Form size="large" onSubmit={this.handleSubmit} noValidate>
+          <Form size="large" onSubmit={this.handleSubmit} noValidate debounceTime={500}>
             <Segment stacked>
               <Input
                 fluid

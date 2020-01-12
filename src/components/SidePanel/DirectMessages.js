@@ -22,6 +22,10 @@ class DirectMessages extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.removeListeners();
+  }
+
   // Effects
   addListeners({ uid }) {
     const { usersRef, connectedRef, presenceRef } = this.state;
@@ -54,6 +58,14 @@ class DirectMessages extends Component {
         this.updateUserStatus(snapshot.key, false);
       }
     });
+  }
+
+  removeListeners() {
+   const { usersRef, presenceRef, connectedRef } = this.state;
+
+   usersRef.off();
+   presenceRef.off();
+   connectedRef.off();
   }
 
   // Helpers

@@ -37,11 +37,6 @@ body,
   overflow-x: hidden;
 }
 
-.messages__header,
-.messages__form {
-  flex: 1;
-}
-
 .message--outcome {
   border-left: 2px solid orange;
   padding-left: 8px;

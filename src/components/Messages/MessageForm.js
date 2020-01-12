@@ -3,7 +3,7 @@ import { Segment, Button, Input } from 'semantic-ui-react';
 import { Picker } from 'emoji-mart';
 import uuidv4 from 'uuid/v4';
 import { databases } from './../../firebase';
-import { resources, colonToInicode } from './../../helpers';
+import { resources } from './../../helpers';
 import FileModal from './FileModal';
 import ProgressBar from './ProgressBar';
 
@@ -21,6 +21,13 @@ class MessageForm extends Component {
     typingRef: databases.typing(),
     upload: '',
     user: this.props.currentUser
+  }
+
+  componentWillUnmount() {
+    const { task } = this.state;
+
+    if (task) { task.cancel(); }
+    this.setState({ task: null });
   }
 
   // Effects
@@ -91,10 +98,9 @@ class MessageForm extends Component {
   handleTogglePicker = () => this.setState({ emojiPicker: !this.state.emojiPicker });
 
   handleSelectEmoji = emoji => {
-    const oldMesage = this.state.message;
-    const newMessage = colonToInicode(` ${oldMesage} ${emoji.colons} `);
+    this.setState({ message: '' });
 
-    this.setState({ message: newMessage, emojiPicker: false });
+    setTimeout(() => this.setState({ message: `${this.state.message}${emoji.native}`, emojiPicker: false }), 0);
     setTimeout(() => this.inputRef.focus(), 0);
   }
 
@@ -111,7 +117,7 @@ class MessageForm extends Component {
       user: {
         id: user.uid,
         name: user.displayName,
-        avatar: user.photoURL // @TODO change to photoURL
+        photoURL: user.photoURL
       }
     };
 

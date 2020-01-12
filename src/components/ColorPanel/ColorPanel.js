@@ -23,6 +23,10 @@ class ColorPanel extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.removeListeners();
+  }
+
   // Effects
   addListeners = uid => {
     const { usersRef } = this.state;
@@ -35,6 +39,12 @@ class ColorPanel extends Component {
 
         this.setState({ colors });
       });
+  }
+
+  removeListeners = () => {
+    const { usersRef, user } = this.state;
+
+    usersRef.child(`${user.uid}/colors`).off();
   }
 
   saveColors = () => {

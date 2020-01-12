@@ -62,14 +62,17 @@ class Channels extends Component {
     this.state.messagesRef.child(id).on('value', snapshot => {
       const { channel, notifications } = this.state;
 
-      if (channel) {
+      if (channel && !this.props.starredChannel) {
         this.handleNotifications(id, channel.id, notifications, snapshot);
       }
     });
   }
 
   removeListeners() {
-    this.state.channelsRef.off();
+    const { channelsRef, messagesRef, channels } = this.state;
+
+    channelsRef.off();
+    channels.forEach(channel => messagesRef.child(channel.id).off());
   }
 
   // Listeners

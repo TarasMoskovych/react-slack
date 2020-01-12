@@ -29,7 +29,7 @@ class UserPanel extends Component {
     this.setState({ loading: true });
 
     storageRef
-      .child(`avatars/user-${user.uid}`)
+      .child(`avatars/user-${user.uid}/${Date.now()}`)
       .put(blob, { contentType: 'image/jpeg' })
       .then(snapshot => {
         snapshot.ref.getDownloadURL().then(downloadURL => {
@@ -55,7 +55,7 @@ class UserPanel extends Component {
   // Listeners
   openModal = () => this.setState({ modal: true });
 
-  closeModal = () => this.setState({ modal: false, loading: false });
+  closeModal = () => this.setState({ modal: false, loading: false, blob: null, cropped: '', uploaded: '', preview: '' });
 
   handleChange = event => {
     const file = event.target.files[0];
@@ -63,9 +63,10 @@ class UserPanel extends Component {
 
     if (file) {
       reader.readAsDataURL(file);
-      reader.addEventListener('load', () => {
-        this.setState({ preview: reader.result });
-      });
+      reader.addEventListener('load',
+        () => {
+          this.setState({ preview: reader.result });
+        }, { once: true });
     }
   }
 

@@ -19,6 +19,7 @@ class Messages extends Component {
     channel: this.props.currentChannel,
     isChannelStarred: false,
     messages: [],
+    listeners: [],
     loading: true,
     privateChannel: this.props.isPrivateChannel,
     privateMessagesRef: databases.privateMessages(),
@@ -37,18 +38,33 @@ class Messages extends Component {
   }
 
   componentDidMount() {
-    const { channel, user } = this.state;
+    const { channel, user, listeners } = this.state;
 
     if (channel && user) {
+      this.removeListeners(listeners);
       this.addListeners(channel.id);
       this.addUserStarsListener(channel.id, user);
     }
+  }
+
+  componentWillUnmount() {
+    const { listeners, connectedRef } = this.state;
+
+    this.removeListeners(listeners);
+    connectedRef.off();
   }
 
   // Effects
   addListeners(id) {
     this.addMessageListener(id);
     this.addTypingListeners(id);
+  }
+
+  removeListeners(listeners) {
+    listeners.forEach(listener => {
+      const { ref, id, event } = listener;
+      ref.child(id).off(event);
+    });
   }
 
   addUserStarsListener(id, user) {
@@ -98,6 +114,7 @@ class Messages extends Component {
         });
 
         this.countUserPosts(messages, cb);
+        this.addToListener(id, ref, 'child_added');
       });
   }
 
@@ -116,6 +133,8 @@ class Messages extends Component {
 
           this.setState({ typingUsers });
         }
+
+        this.addToListener(id, typingRef, 'child_added');
       });
 
     typingRef
@@ -127,6 +146,8 @@ class Messages extends Component {
           typingUsers = typingUsers.filter(user => user.id !== snapshot.key);
           this.setState({ typingUsers });
         }
+
+        this.addToListener(id, typingRef, 'child_removed');
       });
 
     connectedRef.on('value', snapshot => {
@@ -165,6 +186,14 @@ class Messages extends Component {
   }
 
   // Helpers
+  addToListener = (id, ref, event) => {
+    const idx = this.state.listeners.findIndex(listener => listener.id === id && listener.ref === ref && listener.event === event);
+
+    if (idx === -1) {
+      this.setState({ listeners: this.state.listeners.concat({ id, ref, event })});
+    }
+  }
+
   getMessagesRef = () => {
     const { messagesRef, privateMessagesRef, privateChannel } = this.state;
     return privateChannel ? privateMessagesRef : messagesRef;
@@ -199,7 +228,7 @@ class Messages extends Component {
         acc[message.user.name].count += 1;
       } else {
         acc[message.user.name] = {
-          photoURL: message.user.avatar, // @TODO change to photoURL
+          photoURL: message.user.photoURL,
           count: 1
         }
       }
@@ -263,7 +292,7 @@ class Messages extends Component {
         />
         <Segment className="messages__area" style={{ margin: 0 }}>
           <Loader active={loading} size="big"/>
-          <Comment.Group style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 320px)', overflow: 'auto' }}>
+          <Comment.Group style={{ margin: 0, maxWidth: '100%', maxHeight: 'calc(100vh - 280px)', overflow: 'auto' }}>
             {this.renderMessages(searchTerm ? searchResults : messages)}
             <div ref={this.getRef}/>
           </Comment.Group>

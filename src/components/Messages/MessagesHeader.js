@@ -16,9 +16,11 @@ const MessagesHeader = ({ channelName, handleSearchChange, users, searchLoading,
             />
           )}
         </span>
-        <Header.Subheader>
-          {users === 1 ? `1 User` : `${users} Users`}
-        </Header.Subheader>
+        {!privateChannel && (
+          <Header.Subheader>
+            {users === 1 ? `1 User` : `${users} Users`}
+          </Header.Subheader>
+        )}
       </Header>
       <Header floated="right">
         <Input

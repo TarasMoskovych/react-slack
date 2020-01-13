@@ -1,10 +1,27 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Segment, Accordion, Header, Icon, Image, List } from 'semantic-ui-react';
+import { connect } from 'react-redux';
+import { setChannel } from './../../store/actions';
+import { databases } from './../../firebase';
 
 class MetaPanel extends Component {
   state = {
     activeIdx: 0,
-    channel: this.props.currentChannel
+    channel: this.props.currentChannel,
+    channelsRef: databases.channels(),
+    user: this.props.currentUser
+  }
+
+  // Effects
+  removeChannel = () => {
+    const { channel, channelsRef } = this.state;
+
+    if (channel?.id) {
+      channelsRef
+        .child(channel.id)
+        .remove()
+        .then(() => this.props.setChannel());
+    }
   }
 
   setActiveIdx = (event, titleProps) => {
@@ -32,7 +49,7 @@ class MetaPanel extends Component {
   }
 
   render() {
-    const { activeIdx, channel } = this.state;
+    const { activeIdx, channel, user } = this.state;
     const { userPosts } = this.props;
 
     return (
@@ -70,10 +87,22 @@ class MetaPanel extends Component {
               {channel?.createdBy.name}
             </Header>
           </Accordion.Content>
+          {channel?.createdBy?.id === user?.uid && (
+            <Fragment>
+              <Accordion.Title active={activeIdx === 3} index={3} onClick={this.setActiveIdx}>
+                <Icon name="dropdown"/>
+                <Icon name="options"/>
+                Actions
+              </Accordion.Title>
+              <Accordion.Content active={activeIdx === 3} index={3} style={{ textAlign: 'center' }}>
+                <Icon color="red" name="remove" link onClick={this.removeChannel}/>Remove
+              </Accordion.Content>
+            </Fragment>
+          )}
         </Accordion>
       </Segment>
     );
   }
 }
 
-export default MetaPanel;
+export default connect(null, { setChannel })(MetaPanel);

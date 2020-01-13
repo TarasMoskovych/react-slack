@@ -72,9 +72,9 @@ const colors_reducer = (state = initialColorsState, action) => {
   switch (action.type) {
     case actionTypes.SET_COLORS:
       return {
-        id: action.payload.id,
-        primary: action.payload.primary,
-        secondary: action.payload.secondary,
+        id: action?.payload?.id || 0,
+        primary: action?.payload?.primary || '#4c3c4c',
+        secondary: action?.payload?.secondary || '#eee',
       };
     default:
       return state;

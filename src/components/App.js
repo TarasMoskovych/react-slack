@@ -20,6 +20,7 @@ const App = ({ currentUser, currentChannel, isPrivateChannel, isStarredChannel, 
         colors={colors}
         key={currentUser?.uid}
         currentUser={currentUser}
+        currentChannel={currentChannel}
         isPrivateChannel={isPrivateChannel}
         isStarredChannel={isStarredChannel}
       />
@@ -36,6 +37,7 @@ const App = ({ currentUser, currentChannel, isPrivateChannel, isStarredChannel, 
           <MetaPanel
             key={currentChannel?.name}
             currentChannel={currentChannel}
+            currentUser={currentUser}
             userPosts={userPosts}
           />
         </Grid.Column>

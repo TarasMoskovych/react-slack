@@ -36,7 +36,8 @@ class Login extends Component {
           .child(uid)
           .set({ displayName, email, photoURL })
           .finally(() => this.setState({ googleLoading: false }));
-      });
+      })
+      .catch(() => this.setState({ googleLoading: false }));
   }
 
   handleSubmit = event => {
@@ -119,7 +120,7 @@ class Login extends Component {
                 type="button"
                 fluid
                 size="large"
-              >Login with&nbsp;&nbsp;<Icon name="google" color="violet"/></Button>
+              >Login with&nbsp;<Icon name="google" color="violet" style={{ margin: 0 }}/>oogle</Button>
             </Segment>
           </Form>
           {errors.length > 0 && (

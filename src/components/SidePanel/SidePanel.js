@@ -7,7 +7,7 @@ import UserPanel from './UserPanel';
 
 class SidePanel extends Component {
   render() {
-    const { currentUser, isPrivateChannel, isStarredChannel, colors } = this.props;
+    const { currentUser, currentChannel, isPrivateChannel, isStarredChannel, colors } = this.props;
 
     return (
       <Menu
@@ -24,6 +24,7 @@ class SidePanel extends Component {
         />
         <Channels
           currentUser={currentUser}
+          currentChannel={currentChannel}
           starredChannel={isStarredChannel}
           privateChannel={isPrivateChannel}
         />

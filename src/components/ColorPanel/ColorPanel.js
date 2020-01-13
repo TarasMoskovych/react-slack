@@ -30,23 +30,14 @@ class ColorPanel extends Component {
   // Effects
   addListeners = uid => {
     const { usersRef } = this.state;
-    const colors = [];
 
     usersRef
       .child(`${uid}/colors`)
-      .on('child_added', snapshot => {
-        colors.unshift(snapshot.val());
-
-        this.setState({ colors });
-      });
+      .on('child_added', snapshot => this.setState({ colors: [].concat(snapshot.val()).concat(this.state.colors) }));
 
     usersRef
       .child(`${uid}/colors`)
-      .on('child_removed', snapshot => {
-        const removed = snapshot.val();
-
-        this.setState({ colors: this.state.colors.filter(color => color.id !== removed?.id) });
-      });
+      .on('child_removed', snapshot => this.setState({ colors: this.state.colors.filter(color => color.id !== snapshot.val()?.id) }));
   }
 
   removeListeners = () => {
@@ -74,7 +65,7 @@ class ColorPanel extends Component {
     .child(`${user.uid}/colors`)
     .child(color.id)
     .remove()
-    .then(() => this.props.setColors({ id: 0, primary: '#40bf43', secondary: '#2d4d86' }));
+    .then(() => this.props.setColors({}));
   }
 
   // Listeners

@@ -158,7 +158,7 @@ class MessageForm extends Component {
   }
 
   render() {
-    const { errors, message, loading, modal, upload, percentUploaded, emojiPicker } = this.state;
+    const { errors, message, loading, modal, upload, percentUploaded, emojiPicker, channel } = this.state;
 
     return (
       <Segment className="message__form">
@@ -199,14 +199,14 @@ class MessageForm extends Component {
             labelPosition="left"
             icon="edit"
             onClick={this.sendMessage}
-            disabled={loading}
+            disabled={loading || !channel}
           />
           <Button
             color="teal"
             content="Upload Media"
             labelPosition="right"
             icon="cloud upload"
-            disabled={upload === 'uploading'}
+            disabled={upload === 'uploading' || !channel}
             onClick={this.openModal}
           />
         </Button.Group>

@@ -39,6 +39,7 @@ class Channels extends Component {
         name: channelName,
         details: channelDetails,
         createdBy: {
+          id: user.uid,
           name: user.displayName,
           photoURL: user.photoURL
         }
@@ -48,13 +49,13 @@ class Channels extends Component {
   }
 
   addListeners() {
-    const channels = [];
-
     this.state.channelsRef.on('child_added', snapshot => {
-      channels.push(snapshot.val());
-
-      this.setState({ channels }, () => this.setFirstChannel());
+      this.setState({ channels: this.state.channels.concat(snapshot.val()) }, () => this.setFirstChannel());
       this.addNotificationListener(snapshot.key);
+    });
+
+    this.state.channelsRef.on('child_removed', snapshot => {
+      this.setState({ channels: this.state.channels.filter(channel => channel.id !== snapshot.val()?.id) });
     });
   }
 
@@ -175,7 +176,8 @@ class Channels extends Component {
   }
 
   render() {
-    const { channels, modal, active } = this.state;
+    const { channels, modal } = this.state;
+    const { currentChannel, privateChannel, starredChannel } = this.props;
 
     return (
       <Fragment>
@@ -189,7 +191,7 @@ class Channels extends Component {
           </Menu.Item>
           {channels.map(channel => (
             <Menu.Item
-              active={channel.id === active && !this.props.privateChannel && !this.props.starredChannel}
+              active={channel.id === currentChannel?.id && !privateChannel && !starredChannel}
               key={channel.id}
               onClick={() => this.changeChannel(channel)}
               name={channel.name}

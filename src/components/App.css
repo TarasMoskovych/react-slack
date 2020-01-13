@@ -37,6 +37,13 @@ body,
   overflow-x: hidden;
 }
 
+.messages__no-channel {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  height: 100%;
+}
+
 .message--outcome {
   border-left: 2px solid orange;
   padding-left: 8px;
@@ -54,6 +61,14 @@ body,
   padding-bottom: 1em;
 }
 
+.color {
+  position: relative;
+}
+
+.color:hover .color__remove-icon {
+  display: block;
+}
+
 .color__container {
   border-radius: 3px;
   cursor: pointer;
@@ -62,9 +77,46 @@ body,
   width: 35px;
 }
 
+.color__container--selected {
+  border: 1px solid white;
+}
+
 .color__square {
   height: 35px;
+  position: relative;
   width: 35px;
+}
+
+.color__remove-icon {
+  cursor: pointer;
+  display: none;
+  height: 10px;
+  opacity: 0.9;
+  position: absolute;
+  right: 0px;
+  top: -5px;
+  width: 10px;
+  z-index: 1;
+}
+
+.color__remove-icon:hover {
+  opacity: 1;
+}
+
+.color__remove-icon:before, .color__remove-icon:after {
+  background-color: white;
+  content: ' ';
+  height: 15px;
+  left: 10px;
+  position: absolute;
+  width: 2px;
+}
+
+.color__remove-icon:before {
+  transform: rotate(45deg);
+}
+.color__remove-icon:after {
+  transform: rotate(-45deg);
 }
 
 .color__overlay {

@@ -39,6 +39,14 @@ class ColorPanel extends Component {
 
         this.setState({ colors });
       });
+
+    usersRef
+      .child(`${uid}/colors`)
+      .on('child_removed', snapshot => {
+        const removed = snapshot.val();
+
+        this.setState({ colors: this.state.colors.filter(color => color.id !== removed?.id) });
+      });
   }
 
   removeListeners = () => {
@@ -49,13 +57,24 @@ class ColorPanel extends Component {
 
   saveColors = () => {
     const { primary, secondary, usersRef, user } = this.state;
+    const id = Date.now();
 
     usersRef
       .child(`${user.uid}/colors`)
-      .push()
-      .update({ primary, secondary })
+      .child(id)
+      .update({ id, primary, secondary })
       .catch(err => console.error(err))
       .finally(() => this.closeModal());
+  }
+
+  removeColor = color => {
+    const { usersRef, user } = this.state;
+
+    usersRef
+    .child(`${user.uid}/colors`)
+    .child(color.id)
+    .remove()
+    .then(() => this.props.setColors({ id: 0, primary: '#40bf43', secondary: '#2d4d86' }));
   }
 
   // Listeners
@@ -75,9 +94,14 @@ class ColorPanel extends Component {
     return colors.length > 0 && colors.map((color, idx) => (
       <Fragment key={idx}>
         <Divider/>
-        <div className="color__container" onClick={() => this.props.setColors(color)}>
-          <div className="color__square" style={{ background: color.primary }}>
-            <div className="color__overlay" style={{ background: color.secondary }}/>
+        <div className="color">
+          {color.id !== 0 && <div className="color__remove-icon" onClick={() => this.removeColor(color)}/>}
+          <div
+            className={`color__container ${this.props.colors.id === color.id ? 'color__container--selected ' : ''}`}
+            onClick={() => this.props.setColors(color)}
+          ><div className="color__square" style={{ background: color.primary }}>
+              <div className="color__overlay" style={{ background: color.secondary }}/>
+            </div>
           </div>
         </div>
       </Fragment>
@@ -94,7 +118,7 @@ class ColorPanel extends Component {
         {/* Custom */}
         {this.renderColors(colors)}
         {/* Default */}
-        {this.renderColors([{ primary: '#4c3c4c', secondary: '#eee' }])}
+        {this.renderColors([{ id: 0, primary: '#4c3c4c', secondary: '#eee' }])}
         <Modal basic open={modal}>
           <Modal.Header>Choose App Colors</Modal.Header>
           <Modal.Content>

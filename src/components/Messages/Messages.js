@@ -291,7 +291,8 @@ class Messages extends Component {
           handleStar={this.handleStar}
         />
         <Segment className="messages__area" style={{ margin: 0 }}>
-          <Loader active={loading} size="big"/>
+          {!channel && <div className="messages__no-channel">Please, select a channel to start messaging</div>}
+          <Loader active={loading && !!channel} size="big"/>
           <Comment.Group style={{ margin: 0, maxWidth: '100%', maxHeight: 'calc(100vh - 280px)', overflow: 'auto' }}>
             {this.renderMessages(searchTerm ? searchResults : messages)}
             <div ref={this.getRef}/>

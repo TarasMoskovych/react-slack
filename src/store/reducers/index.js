@@ -63,6 +63,7 @@ const channel_reducer = (state = initialChannelState, action) => {
 };
 
 const initialColorsState = {
+  id: 0,
   primary: '#4c3c4c',
   secondary: '#eee'
 };
@@ -71,6 +72,7 @@ const colors_reducer = (state = initialColorsState, action) => {
   switch (action.type) {
     case actionTypes.SET_COLORS:
       return {
+        id: action.payload.id,
         primary: action.payload.primary,
         secondary: action.payload.secondary,
       };

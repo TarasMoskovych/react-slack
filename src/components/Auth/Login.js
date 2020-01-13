@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Segment, Button, Header, Message, Icon } from 'semantic-ui-react';
+import { Grid, Segment, Button, Header, Message, Icon, Divider } from 'semantic-ui-react';
 import { Form, Input } from 'semantic-ui-react-form-validator'
-import firebase from './../../firebase';
+import firebase, { databases } from './../../firebase';
 
 class Login extends Component {
   state = {
@@ -10,6 +10,8 @@ class Login extends Component {
     password: '',
     errors: [],
     loading: false,
+    googleLoading: false,
+    usersRef: databases.users()
   };
 
   // Listeners
@@ -18,6 +20,24 @@ class Login extends Component {
 
     this.setState({ [event.target.name]: event.target.value });
   };
+
+  handleGoogleSignIn = () => {
+    const { usersRef } = this.state;
+    const { auth } = firebase;
+
+    this.setState({ googleLoading: true });
+
+    auth()
+      .signInWithPopup(new auth.GoogleAuthProvider())
+      .then(({ user }) => {
+        const { displayName, email, photoURL, uid } = user;
+
+        usersRef
+          .child(uid)
+          .set({ displayName, email, photoURL })
+          .finally(() => this.setState({ googleLoading: false }));
+      });
+  }
 
   handleSubmit = event => {
     event.persist();
@@ -46,7 +66,7 @@ class Login extends Component {
   };
 
   render() {
-    const { email, password, loading, errors } = this.state;
+    const { email, password, loading, googleLoading, errors } = this.state;
 
     return (
       <Grid textAlign="center" verticalAlign="middle" className="app">
@@ -92,6 +112,14 @@ class Login extends Component {
                 fluid
                 size="large"
               >Login</Button>
+              <Divider/>
+              <Button
+                onClick={this.handleGoogleSignIn}
+                disabled={googleLoading}
+                type="button"
+                fluid
+                size="large"
+              >Login with&nbsp;&nbsp;<Icon name="google" color="violet"/></Button>
             </Segment>
           </Form>
           {errors.length > 0 && (

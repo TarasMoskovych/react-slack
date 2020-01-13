@@ -51,10 +51,11 @@ export const setUserPosts = userPosts => {
   };
 };
 
-export const setColors = ({ primary, secondary }) => {
+export const setColors = ({ id, primary, secondary }) => {
   return {
     type: actionTypes.SET_COLORS,
     payload: {
+      id,
       primary,
       secondary
     }

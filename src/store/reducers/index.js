@@ -28,6 +28,7 @@ const initialChannelState = {
   currentChannel: null,
   isPrivateChannel: false,
   isStarredChannel: false,
+  isCurrentChannelStarred: false,
   userPosts: null
 };
 
@@ -51,6 +52,12 @@ const channel_reducer = (state = initialChannelState, action) => {
         ...state,
         isPrivateChannel: false,
         isStarredChannel: action.payload.isStarredChannel
+      };
+    case actionTypes.SET_STARRED_CURRENT_CHANNEL:
+      return {
+        ...state,
+        isPrivateChannel: false,
+        isCurrentChannelStarred: action.payload.isCurrentChannelStarred
       };
     case actionTypes.SET_USER_POSTS:
       return {

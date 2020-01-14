@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Grid, Segment, Button, Header, Message, Icon } from 'semantic-ui-react';
 import { Form, Input } from 'semantic-ui-react-form-validator'
 import firebase, { databases } from './../../firebase';
-import { generateAvatar } from './../../helpers';
+import { generateAvatar, focusFirstInvalidField } from './../../helpers';
 
 class Register extends Component {
   state = {
@@ -60,6 +60,8 @@ class Register extends Component {
       .finally(() => this.setState({ loading: false }));
   };
 
+  handleError = data => focusFirstInvalidField(`[name="${data[0].props.name}"]`);
+
   // Renders
   displayErrors = errors => errors.map((error, idx) => <p key={idx}>{error.message}</p>);
 
@@ -77,7 +79,7 @@ class Register extends Component {
             <Icon name="puzzle piece" color="orange"/>
             Register for DevChat
           </Header>
-          <Form size="large" onSubmit={this.handleSubmit} noValidate debounceTime={500}>
+          <Form onError={this.handleError} size="large" onSubmit={this.handleSubmit} noValidate debounceTime={500}>
             <Segment stacked>
               <Input
                 fluid

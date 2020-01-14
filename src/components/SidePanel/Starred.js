@@ -29,8 +29,8 @@ class Starred extends Component {
     usersRef
       .child(user.uid)
       .child('starred')
-      .on('child_added', snaphot => {
-        const starredChannel = { id: snaphot.key, ...snaphot.val() };
+      .on('child_added', snapshot => {
+        const starredChannel = { id: snapshot.key, ...snapshot.val() };
 
         this.setState({ starredChannels: [...this.state.starredChannels, starredChannel] });
       });
@@ -38,11 +38,24 @@ class Starred extends Component {
     usersRef
       .child(user.uid)
       .child('starred')
-      .on('child_removed', snaphot => {
-        const channelToRemove = { id: snaphot.key, ...snaphot.val() };
+      .on('child_removed', snapshot => {
+        const channelToRemove = { id: snapshot.key, ...snapshot.val() };
         const filteredChannels = this.state.starredChannels.filter(channel => channel.id !== channelToRemove.id);
 
         this.setState({ starredChannels: filteredChannels });
+      });
+
+    usersRef
+      .child(user.uid)
+      .child('starred')
+      .on('child_changed', snapshot => {
+        const starredChannels = this.state.starredChannels;
+        const idx = starredChannels.findIndex(channel => channel.id === snapshot.key);
+
+        if (idx > -1) {
+          starredChannels.splice(idx, 1, snapshot.val());
+          this.setState({ starredChannels });
+        }
       });
   }
 

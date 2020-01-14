@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Segment, Comment, Loader } from 'semantic-ui-react';
 import { connect } from 'react-redux';
-import { setUserPosts } from './../../store/actions';
+import { setUserPosts, setStarredCurrentChannel } from './../../store/actions';
 import _ from 'lodash';
 
 import MessagesHeader from './MessagesHeader';
@@ -68,7 +68,7 @@ class Messages extends Component {
   }
 
   addUserStarsListener(id, user) {
-    const { usersRef } = this.state;
+    const { usersRef, privateChannel } = this.state;
 
     usersRef
       .child(user.uid)
@@ -76,8 +76,10 @@ class Messages extends Component {
       .once('value')
       .then(data => {
         if (data && data.val()) {
-          const ids = Object.keys(data.val());
-          this.setState({ isChannelStarred: ids.includes(id) })
+          const isChannelStarred = Object.keys(data.val()).includes(id);
+
+          this.setState({ isChannelStarred });
+          !privateChannel && this.props.setStarredCurrentChannel(isChannelStarred);
         }
       });
   }
@@ -162,7 +164,8 @@ class Messages extends Component {
   }
 
   starChannel = () => {
-    const { isChannelStarred, usersRef, user, channel } = this.state;
+    const { isChannelStarred, usersRef, user } = this.state;
+    const channel = this.props.currentChannel;
 
     if (isChannelStarred) {
       usersRef
@@ -207,7 +210,13 @@ class Messages extends Component {
     this.setState({ searchTerm: event.target.value, searchLoading: true }, () => this.searchMessages());
   }
 
-  handleStar = () => this.setState({ isChannelStarred: !this.state.isChannelStarred }, () => this.starChannel());
+  handleStar = () => {
+    this.setState({ isChannelStarred: !this.state.isChannelStarred },
+      () => {
+        this.props.setStarredCurrentChannel(this.state.isChannelStarred);
+        this.starChannel();
+      });
+  };
 
   searchMessages = () => {
     const regex = new RegExp(this.state.searchTerm, 'gi');
@@ -239,8 +248,6 @@ class Messages extends Component {
   }
 
   // Renders
-  renderChannelName = channel => channel ? `${this.state.privateChannel ? '@' : '#'}${channel.name}` : '';
-
   renderMessages(messages) {
     return (
       messages.length > 0 && messages.map(message => (
@@ -282,7 +289,7 @@ class Messages extends Component {
     return (
       <div className="messages">
         <MessagesHeader
-          channelName={this.renderChannelName(channel)}
+          channel={this.props.currentChannel}
           users={users}
           handleSearchChange={this.handleSearchChange}
           searchLoading={searchLoading}
@@ -313,4 +320,4 @@ class Messages extends Component {
   }
 }
 
-export default connect(null, { setUserPosts })(Messages);
+export default connect(null, { setUserPosts, setStarredCurrentChannel })(Messages);

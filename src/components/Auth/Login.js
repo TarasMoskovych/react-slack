@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Grid, Segment, Button, Header, Message, Icon, Divider } from 'semantic-ui-react';
 import { Form, Input } from 'semantic-ui-react-form-validator'
 import firebase, { databases } from './../../firebase';
+import { focusFirstInvalidField }from './../../helpers';
 
 class Login extends Component {
   state = {
@@ -34,8 +35,7 @@ class Login extends Component {
 
         usersRef
           .child(uid)
-          .set({ displayName, email, photoURL })
-          .finally(() => this.setState({ googleLoading: false }));
+          .set({ displayName, email, photoURL });
       })
       .catch(() => this.setState({ googleLoading: false }));
   }
@@ -59,6 +59,8 @@ class Login extends Component {
       .finally(() => this.setState({ loading: false }));
   };
 
+  handleError = data => focusFirstInvalidField(`[name="${data[0].props.name}"]`);
+
   // Renders
   displayErrors = errors => errors.map((error, idx) => <p key={idx}>{error.message}</p>);
 
@@ -76,7 +78,7 @@ class Login extends Component {
             <Icon name="code branch" color="violet"/>
             Login to DevChat
           </Header>
-          <Form size="large" onSubmit={this.handleSubmit} noValidate debounceTime={500}>
+          <Form size="large" onSubmit={this.handleSubmit} noValidate debounceTime={500} onError={this.handleError}>
             <Segment stacked>
               <Input
                 fluid

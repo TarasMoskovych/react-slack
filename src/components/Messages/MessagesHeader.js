@@ -1,13 +1,13 @@
 import React from 'react';
 import { Header, Segment, Icon, Input } from 'semantic-ui-react';
 
-const MessagesHeader = ({ channelName, handleSearchChange, users, searchLoading, privateChannel, handleStar, isChannelStarred }) => {
+const MessagesHeader = ({ channel, handleSearchChange, users, searchLoading, privateChannel, handleStar, isChannelStarred }) => {
   return (
-    <Segment clearing>
-      <Header fluid="true" as="h2" floated="left" style={{ marginBottom: 0 }}>
+    <Segment style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Header fluid="true" as="h2" style={{ marginBottom: 0 }}>
         <span>
-          {channelName}
-          {!privateChannel && (
+          {channel ? `${privateChannel ? '@' : '#'}${channel?.name}` : ''}
+          {!privateChannel && channel && (
             <Icon
               onClick={handleStar}
               link
@@ -22,8 +22,9 @@ const MessagesHeader = ({ channelName, handleSearchChange, users, searchLoading,
           </Header.Subheader>
         )}
       </Header>
-      <Header floated="right">
+      <Header style={{ margin: 0 }}>
         <Input
+          disabled={!channel}
           loading={searchLoading}
           onChange={handleSearchChange}
           size="mini"

@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import { Sidebar, Menu, Divider, Button, Modal, Icon, Label, Segment } from 'semantic-ui-react';
-import { SliderPicker } from 'react-color';
+import { Sidebar, Menu, Divider, Button, Modal, Icon, Label } from 'semantic-ui-react';
+import { SketchPicker } from 'react-color';
 import { connect } from 'react-redux';
 import { setColors } from './../../store/actions';
 import { databases } from './../../firebase';
@@ -111,22 +111,24 @@ class ColorPanel extends Component {
         {/* Default */}
         {this.renderColors([{ id: 0, primary: '#4c3c4c', secondary: '#eee' }])}
         <Modal basic open={modal}>
-          <Modal.Header>Choose App Colors</Modal.Header>
+          <Modal.Header style={{ textAlign: 'center' }}>Choose App Colors</Modal.Header>
           <Modal.Content>
-            <Segment inverted>
-              <Label content="Primary Color" style={{ marginBottom: '1em' }}/>
-              <SliderPicker
-                color={primary}
-                onChange={this.handleChangePrimary}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ marginRight: '10px' }}>
+                <Label content="Primary Color" style={{ marginBottom: '1em' }}/>
+                <SketchPicker
+                  color={primary}
+                  onChange={this.handleChangePrimary}
               />
-            </Segment>
-            <Segment inverted>
-              <Label content="Secondary Color" style={{ marginBottom: '1em' }}/>
-              <SliderPicker
-                color={secondary}
-                onChange={this.handleChangeSecondary}
-              />
-            </Segment>
+              </div>
+              <div style={{ marginLeft: '10px' }}>
+                <Label content="Secondary Color" style={{ marginBottom: '1em' }}/>
+                <SketchPicker
+                  color={secondary}
+                  onChange={this.handleChangeSecondary}
+                />
+              </div>
+            </div>
           </Modal.Content>
           <Modal.Actions>
             <Button color="green" inverted onClick={this.handleSaveColors}>

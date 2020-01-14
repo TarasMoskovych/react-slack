@@ -42,6 +42,15 @@ export const setStarredChannel = isStarredChannel => {
   };
 };
 
+export const setStarredCurrentChannel = isCurrentChannelStarred => {
+  return {
+    type: actionTypes.SET_STARRED_CURRENT_CHANNEL,
+    payload: {
+      isCurrentChannelStarred
+    }
+  };
+};
+
 export const setUserPosts = userPosts => {
   return {
     type: actionTypes.SET_USER_POSTS,

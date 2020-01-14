@@ -34,8 +34,7 @@ class Login extends Component {
 
         usersRef
           .child(uid)
-          .set({ displayName, email, photoURL })
-          .finally(() => this.setState({ googleLoading: false }));
+          .set({ displayName, email, photoURL });
       })
       .catch(() => this.setState({ googleLoading: false }));
   }

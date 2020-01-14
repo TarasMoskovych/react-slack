@@ -15,10 +15,11 @@ class UserPanel extends Component {
     usersRef: databases.users(),
     storageRef: databases.storage(),
     uploaded: '',
+    selected: 'user'
   }
 
   // Effects
-  handleSignOut = () => {
+  signOut = () => {
     firebase
       .auth()
       .signOut();
@@ -57,6 +58,13 @@ class UserPanel extends Component {
 
   closeModal = () => this.setState({ modal: false, loading: false, blob: null, cropped: '', uploaded: '', preview: '' });
 
+  handleClose = () => this.setState({ selected: 'user' });
+
+  handleDropdownChange = (event, { value }) => {
+    value === 'avatar' && this.openModal();
+    value === 'signout' && this.signOut();
+  };
+
   handleChange = event => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -80,7 +88,7 @@ class UserPanel extends Component {
   }
 
   // Helpers
-  dropdownOptions = () => [
+  dropdownOptions = [
     {
       key: 'user',
       text: <span>Signed in as <strong>{this.state.user.displayName}</strong></span>,
@@ -88,16 +96,18 @@ class UserPanel extends Component {
     },
     {
       key: 'avatar',
-      text: <span onClick={this.openModal}>Change Avatar</span>,
+      text: <span>Change Avatar</span>,
+      value: 'avatar'
     },
     {
       key: 'signout',
-      text: <span onClick={this.handleSignOut}>Sign Out</span>,
+      text: <span>Sign Out</span>,
+      value: 'signout'
     },
   ];
 
   render() {
-    const { user, modal, preview, cropped, loading } = this.state;
+    const { user, modal, preview, cropped, loading, selected } = this.state;
 
     return (
       <Grid style={{ background: this.props.colors.primary }}>
@@ -111,13 +121,16 @@ class UserPanel extends Component {
             </Header>
             <Header style={{ padding: '.25em' }} as="h4" inverted>
               <Dropdown
+                value={selected}
+                onChange={this.handleDropdownChange}
+                onClose={this.handleClose}
                 trigger={
                   <span>
                     <Image src={user.photoURL} spaced="right" avatar/>
                     {user.displayName}
                   </span>
                 }
-                options={this.dropdownOptions()}
+                options={this.dropdownOptions}
               />
             </Header>
           </Grid.Row>

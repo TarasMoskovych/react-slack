@@ -57,6 +57,16 @@ class Channels extends Component {
     this.state.channelsRef.on('child_removed', snapshot => {
       this.setState({ channels: this.state.channels.filter(channel => channel.id !== snapshot.val()?.id) });
     });
+
+    this.state.channelsRef.on('child_changed', snapshot => {
+      const channels = this.state.channels;
+      const idx = channels.findIndex(channel => channel.id === snapshot.key);
+
+      if (idx > -1) {
+        channels.splice(idx, 1, snapshot.val());
+        this.setState({ channels });
+      }
+    });
   }
 
   addNotificationListener = id => {

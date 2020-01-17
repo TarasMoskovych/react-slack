@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { setUser } from './../../store/actions';
 import { Grid, Segment, Button, Header, Message, Icon, Divider } from 'semantic-ui-react';
 import { Form, Input } from 'semantic-ui-react-form-validator'
 import firebase, { databases } from './../../firebase';
@@ -35,7 +37,8 @@ class Login extends Component {
 
         usersRef
           .child(uid)
-          .set({ displayName, email, photoURL });
+          .set({ displayName, email, photoURL })
+          .then(() => this.handleAuthDone(user));
       })
       .catch(() => this.setState({ googleLoading: false }));
   }
@@ -50,16 +53,26 @@ class Login extends Component {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
-      .then(userData => {
-        if (!userData.user.emailVerified) {
+      .then(({ user }) => {
+        if (!user.emailVerified) {
           this.setState({ errors: this.state.errors.concat({ message: 'Your account is inactive. Please, confirm Your email.' }) });
+        } else {
+          this.handleAuthDone(user);
         }
       })
-      .catch(err => this.setState({ errors: this.state.errors.concat(err) }))
-      .finally(() => this.setState({ loading: false }));
+      .catch(err => this.setState({ errors: this.state.errors.concat(err), loading: false }));
   };
 
   handleError = data => focusFirstInvalidField(data[0]);
+
+  handleAuthDone = user => {
+    const { history, setUser, currentUser } = this.props;
+
+    if (!currentUser) {
+      setUser(user);
+      history.push('/');
+    }
+  }
 
   // Renders
   displayErrors = errors => errors.map((error, idx) => <p key={idx}>{error.message}</p>);
@@ -137,4 +150,8 @@ class Login extends Component {
   }
 }
 
-export default Login;
+const mapStateFromProps = ({ user }) => ({
+  currentUser: user.currentUser
+});
+
+export default connect(mapStateFromProps, { setUser })(Login);

@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "react",
     "public": "./build",
     "rewrites": [ {
       "source": "**",

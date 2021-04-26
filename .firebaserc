@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "rng-slack"
+  },
+  "targets": {
+    "rng-slack": {
+      "hosting": {
+        "react": [
+          "react16-slack"
+        ]
+      }
+    }
   }
 }
